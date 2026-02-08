@@ -1,17 +1,27 @@
 "use client";
 
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Palette, Keyboard, Cog } from "lucide-react";
 import {
   useConfiguratorStore,
   CATEGORIES,
   OPTIONS,
-  type Category,
   type ConfigOption,
 } from "@/store/useConfiguratorStore";
 
 /* ——————————————————————————————————————————————
-   Category Tabs (Horizontal Pill Selector)
+   Icon mapping
+   —————————————————————————————————————————————— */
+
+const CATEGORY_ICONS = {
+  body: Palette,
+  keycaps: Keyboard,
+  switches: Cog,
+} as const;
+
+/* ——————————————————————————————————————————————
+   Category Tabs
    —————————————————————————————————————————————— */
 
 function CategoryTabs() {
@@ -19,17 +29,17 @@ function CategoryTabs() {
   const setActiveCategory = useConfiguratorStore((s) => s.setActiveCategory);
 
   return (
-    <div className="flex items-center gap-1 px-2">
+    <div className="flex items-center gap-1 px-3">
       {CATEGORIES.map((cat) => {
         const isActive = activeCategory === cat.id;
+        const Icon = CATEGORY_ICONS[cat.id];
         return (
           <motion.button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
             className="relative flex-1 px-3 py-2.5 rounded-xl text-center"
-            whileTap={{ scale: 0.97 }}
+            whileTap={{ scale: 0.96 }}
           >
-            {/* Active pill background */}
             {isActive && (
               <motion.div
                 layoutId="activeCategoryPill"
@@ -37,17 +47,23 @@ function CategoryTabs() {
                 transition={{ type: "spring", stiffness: 400, damping: 30 }}
               />
             )}
-            <span className="relative z-10 flex flex-col items-center gap-0.5">
+            <span className="relative z-10 flex flex-col items-center gap-1">
+              <Icon
+                size={14}
+                className={`transition-colors duration-300 ${
+                  isActive ? "text-white/80" : "text-white/25"
+                }`}
+              />
               <span
-                className={`text-xs font-semibold tracking-wide transition-colors duration-300 ${
-                  isActive ? "text-white" : "text-white/35"
+                className={`text-[11px] font-semibold tracking-wide transition-colors duration-300 ${
+                  isActive ? "text-white" : "text-white/30"
                 }`}
               >
                 {cat.label}
               </span>
               <span
-                className={`text-[10px] transition-colors duration-300 ${
-                  isActive ? "text-white/50" : "text-white/20"
+                className={`text-[9px] transition-colors duration-300 ${
+                  isActive ? "text-white/40" : "text-white/15"
                 }`}
               >
                 {cat.subtitle}
@@ -61,7 +77,7 @@ function CategoryTabs() {
 }
 
 /* ——————————————————————————————————————————————
-   Color Swatch (Individual item)
+   Color Swatch
    —————————————————————————————————————————————— */
 
 interface SwatchProps {
@@ -76,30 +92,27 @@ function ColorSwatch({ option, isSelected, index, onSelect }: SwatchProps) {
     <motion.button
       onClick={onSelect}
       className="snap-center flex-shrink-0 flex flex-col items-center gap-2 outline-none"
-      initial={{ opacity: 0, scale: 0.7, y: 12 }}
+      initial={{ opacity: 0, scale: 0.7, y: 14 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{
-        delay: index * 0.04,
+        delay: index * 0.045,
         type: "spring",
         stiffness: 350,
         damping: 25,
       }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
+      whileHover={{ scale: 1.12 }}
+      whileTap={{ scale: 0.88 }}
     >
-      {/* Swatch circle */}
       <div className="relative">
         <motion.div
           className="w-[52px] h-[52px] rounded-full"
           style={{
             background: option.color,
             boxShadow: isSelected
-              ? `0 0 20px ${option.color}50, 0 4px 15px ${option.color}30`
-              : `0 2px 8px rgba(0,0,0,0.3)`,
+              ? `0 0 0 3px #09090b, 0 0 24px ${option.color}55, 0 6px 20px ${option.color}35`
+              : "0 2px 10px rgba(0,0,0,0.4)",
           }}
-          animate={{
-            scale: isSelected ? 1 : 0.88,
-          }}
+          animate={{ scale: isSelected ? 1 : 0.85 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         />
 
@@ -108,19 +121,27 @@ function ColorSwatch({ option, isSelected, index, onSelect }: SwatchProps) {
           {isSelected && (
             <motion.div
               className="absolute -inset-[5px] rounded-full border-[2px] border-white/70"
-              initial={{ scale: 0.6, opacity: 0 }}
+              initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 1.2, opacity: 0 }}
+              exit={{ scale: 1.3, opacity: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
             />
           )}
         </AnimatePresence>
+
+        {/* Inner shine */}
+        <div
+          className="absolute inset-[6px] rounded-full pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 50%)",
+          }}
+        />
       </div>
 
-      {/* Label */}
       <span
-        className={`text-[11px] font-medium whitespace-nowrap transition-colors duration-200 ${
-          isSelected ? "text-white/90" : "text-white/30"
+        className={`text-[10px] font-medium whitespace-nowrap transition-colors duration-200 ${
+          isSelected ? "text-white/90" : "text-white/25"
         }`}
       >
         {option.name}
@@ -146,7 +167,6 @@ function ColorCarousel() {
   const handleSelect = useCallback(
     (option: ConfigOption) => {
       selectOption(activeCategory, option.id);
-      // Mobile haptic feedback
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         navigator.vibrate(8);
       }
@@ -169,29 +189,36 @@ function ColorCarousel() {
   }, [activeCategory, selectedId, options]);
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Swatches Row */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeCategory}
-          ref={scrollRef}
-          className="flex gap-5 overflow-x-auto px-6 py-3 scrollbar-hide snap-x"
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -30 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-        >
-          {options.map((opt, i) => (
-            <ColorSwatch
-              key={opt.id}
-              option={opt}
-              isSelected={opt.id === selectedId}
-              index={i}
-              onSelect={() => handleSelect(opt)}
-            />
-          ))}
-        </motion.div>
-      </AnimatePresence>
+    <div className="flex flex-col gap-2">
+      {/* Carousel with edge fades */}
+      <div className="relative">
+        {/* Left fade */}
+        <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-black/50 to-transparent pointer-events-none z-10 rounded-l-2xl" />
+        {/* Right fade */}
+        <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-black/50 to-transparent pointer-events-none z-10 rounded-r-2xl" />
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeCategory}
+            ref={scrollRef}
+            className="flex gap-5 overflow-x-auto px-8 py-3 scrollbar-hide snap-x"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            {options.map((opt, i) => (
+              <ColorSwatch
+                key={opt.id}
+                option={opt}
+                isSelected={opt.id === selectedId}
+                index={i}
+                onSelect={() => handleSelect(opt)}
+              />
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       {/* Selected Info */}
       <AnimatePresence mode="wait">
@@ -208,7 +235,7 @@ function ColorCarousel() {
               {selectedOption.name}
             </p>
             {selectedOption.description && (
-              <p className="text-xs text-white/35 mt-0.5">
+              <p className="text-[11px] text-white/35 mt-0.5">
                 {selectedOption.description}
               </p>
             )}
@@ -220,8 +247,12 @@ function ColorCarousel() {
 }
 
 /* ——————————————————————————————————————————————
-   Summary Footer
+   Summary Footer (with dynamic pricing)
    —————————————————————————————————————————————— */
+
+const PREMIUM_BODIES = new Set(["burgundy", "forest", "rose"]);
+const PREMIUM_KEYCAPS = new Set(["matcha", "lavender", "sunset"]);
+const PREMIUM_SWITCHES = new Set(["speed", "black"]);
 
 function SummaryFooter() {
   const bodyColor = useConfiguratorStore((s) => s.bodyColor);
@@ -229,68 +260,90 @@ function SummaryFooter() {
   const switchColor = useConfiguratorStore((s) => s.switchColor);
   const selectedOptions = useConfiguratorStore((s) => s.selectedOptions);
 
-  const bodyName =
-    OPTIONS.body.find((o) => o.id === selectedOptions.body)?.name ?? "";
-  const keycapName =
-    OPTIONS.keycaps.find((o) => o.id === selectedOptions.keycaps)?.name ?? "";
-  const switchName =
-    OPTIONS.switches.find((o) => o.id === selectedOptions.switches)?.name ?? "";
+  const bodyOpt = OPTIONS.body.find((o) => o.id === selectedOptions.body);
+  const keycapOpt = OPTIONS.keycaps.find(
+    (o) => o.id === selectedOptions.keycaps
+  );
+  const switchOpt = OPTIONS.switches.find(
+    (o) => o.id === selectedOptions.switches
+  );
+
+  const price = useMemo(() => {
+    let total = 349;
+    if (PREMIUM_BODIES.has(selectedOptions.body)) total += 30;
+    if (PREMIUM_KEYCAPS.has(selectedOptions.keycaps)) total += 25;
+    if (PREMIUM_SWITCHES.has(selectedOptions.switches)) total += 15;
+    return total;
+  }, [selectedOptions]);
 
   return (
-    <div className="flex items-center justify-between px-4 pt-3 mt-1 border-t border-white/[0.04]">
+    <div className="flex items-center justify-between px-4 pt-3 mt-2 border-t border-white/[0.05]">
       {/* Config preview */}
       <div className="flex items-center gap-3">
         <div className="flex -space-x-1.5">
           {[bodyColor, keycapColor, switchColor].map((c, i) => (
             <motion.div
-              key={i}
+              key={`${c}-${i}`}
               className="w-5 h-5 rounded-full border-2 border-zinc-900"
               style={{ background: c }}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: i * 0.08 }}
+              animate={{ scale: [0.8, 1] }}
+              transition={{ duration: 0.2 }}
             />
           ))}
         </div>
         <div className="flex flex-col">
-          <span className="text-[10px] text-white/25 leading-tight">
-            {bodyName} · {keycapName}
+          <span className="text-[10px] text-white/30 leading-tight">
+            {bodyOpt?.name} · {keycapOpt?.name}
           </span>
-          <span className="text-[10px] text-white/25 leading-tight">
-            {switchName}
+          <span className="text-[10px] text-white/20 leading-tight">
+            {switchOpt?.name}
           </span>
         </div>
       </div>
 
-      {/* CTA Button */}
-      <motion.button
-        className="px-5 py-2 text-xs font-semibold text-white/90 bg-white/[0.07] hover:bg-white/[0.12] rounded-full transition-colors border border-white/[0.06]"
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
-      >
-        Kaydet
-      </motion.button>
+      {/* Price + CTA */}
+      <div className="flex items-center gap-3">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={price}
+            className="text-base font-bold text-white/90 tabular-nums"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.15 }}
+          >
+            ${price}
+          </motion.span>
+        </AnimatePresence>
+
+        <motion.button
+          className="px-5 py-2 text-xs font-semibold text-black bg-white hover:bg-white/90 rounded-full transition-colors"
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+        >
+          Sipariş Ver
+        </motion.button>
+      </div>
     </div>
   );
 }
 
 /* ——————————————————————————————————————————————
-   Main Configurator UI (Overlay)
+   Main Configurator UI (Bottom Overlay)
    —————————————————————————————————————————————— */
 
 export default function ConfiguratorUI() {
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
-      {/* Glass Panel */}
       <motion.div
         className="mx-3 mb-3 rounded-3xl glass pointer-events-auto py-4 pb-5"
-        initial={{ y: 100, opacity: 0 }}
+        initial={{ y: 120, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{
           type: "spring",
-          stiffness: 200,
-          damping: 25,
-          delay: 0.3,
+          stiffness: 180,
+          damping: 22,
+          delay: 0.4,
         }}
       >
         <CategoryTabs />
@@ -304,4 +357,3 @@ export default function ConfiguratorUI() {
     </div>
   );
 }
-
