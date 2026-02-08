@@ -9,8 +9,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+  --font-mono: var(--font-inter);
 }
 
 /* ——— Base Reset ——— */
@@ -34,7 +35,12 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ——— Scrollbar Hide (for carousels) ——— */
+/* ——— Display Font Utility ——— */
+.font-display {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+}
+
+/* ——— Scrollbar Hide ——— */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -62,7 +68,7 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-/* ——— Canvas Container ——— */
+/* ——— Canvas ——— */
 canvas {
   touch-action: pan-y;
 }

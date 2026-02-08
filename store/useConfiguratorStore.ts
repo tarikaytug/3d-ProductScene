@@ -92,9 +92,11 @@ interface ConfiguratorState {
   keycapColor: string;
   switchColor: string;
   selectedOptions: Record<Category, string>;
+  soundEnabled: boolean;
 
   setActiveCategory: (category: Category) => void;
   selectOption: (category: Category, optionId: string) => void;
+  toggleSound: () => void;
 }
 
 export const useConfiguratorStore = create<ConfiguratorState>((set) => ({
@@ -107,6 +109,7 @@ export const useConfiguratorStore = create<ConfiguratorState>((set) => ({
     keycaps: OPTIONS.keycaps[0].id,
     switches: OPTIONS.switches[0].id,
   },
+  soundEnabled: true,
 
   setActiveCategory: (category) => set({ activeCategory: category }),
 
@@ -121,5 +124,6 @@ export const useConfiguratorStore = create<ConfiguratorState>((set) => ({
       ...(category === "switches" && { switchColor: option.color }),
     }));
   },
-}));
 
+  toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
+}));

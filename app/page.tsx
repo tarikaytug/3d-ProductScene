@@ -2,7 +2,9 @@
 
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
+import { Volume2, VolumeX } from "lucide-react";
 import ConfiguratorUI from "@/components/ConfiguratorUI";
+import { useConfiguratorStore } from "@/store/useConfiguratorStore";
 
 /* ——— 3D Scene – client-only (no SSR for WebGL) ——— */
 const Scene = dynamic(() => import("@/components/Scene"), {
@@ -21,6 +23,9 @@ const Scene = dynamic(() => import("@/components/Scene"), {
 
 /* ——— Page ——— */
 export default function Home() {
+  const soundEnabled = useConfiguratorStore((s) => s.soundEnabled);
+  const toggleSound = useConfiguratorStore((s) => s.toggleSound);
+
   return (
     <main className="relative h-dvh w-full overflow-hidden bg-zinc-950">
       {/* ——— Animated Header ——— */}
@@ -31,30 +36,58 @@ export default function Home() {
         transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
       >
         <div>
-          <h1 className="text-lg font-bold tracking-tight text-white/90">
+          <h1 className="text-xl font-bold tracking-tighter text-white/90 font-display">
             MECH
-            <span className="text-white/40 font-normal">CONFIG</span>
+            <span className="text-white/40 font-light">CONFIG</span>
           </h1>
           <p className="text-[11px] text-white/25 mt-0.5 tracking-wide">
             Premium Keyboard Configurator
           </p>
         </div>
 
-        {/* Badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.06]">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[10px] text-white/40 font-medium tracking-wide">
-            Interactive Demo
-          </span>
+        <div className="flex items-center gap-2">
+          {/* Sound toggle */}
+          <motion.button
+            onClick={toggleSound}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-white/[0.05] border border-white/[0.06] hover:bg-white/[0.1] transition-colors"
+            whileTap={{ scale: 0.9 }}
+            title={soundEnabled ? "Sesi kapat" : "Sesi aç"}
+          >
+            {soundEnabled ? (
+              <Volume2 size={14} className="text-white/50" />
+            ) : (
+              <VolumeX size={14} className="text-white/25" />
+            )}
+          </motion.button>
+
+          {/* Live badge */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.06]">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] text-white/40 font-medium tracking-wide">
+              Interactive
+            </span>
+          </div>
         </div>
       </motion.header>
 
-      {/* ——— 3D Scene (full viewport) ——— */}
+      {/* ——— Hint ——— */}
+      <motion.div
+        className="absolute top-20 left-0 right-0 z-10 text-center pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2, duration: 1 }}
+      >
+        <p className="text-[11px] text-white/20 tracking-widest uppercase font-display">
+          Klavyeni kullanarak tuşlara bas ⌨
+        </p>
+      </motion.div>
+
+      {/* ——— 3D Scene ——— */}
       <div className="absolute inset-0">
         <Scene />
       </div>
 
-      {/* ——— Vignette Overlay for depth ——— */}
+      {/* ——— Vignette Overlay ——— */}
       <div
         className="absolute inset-0 pointer-events-none z-[5]"
         style={{

@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Palette, Keyboard, Cog } from "lucide-react";
+import { Palette, Keyboard, Cog, ArrowRight } from "lucide-react";
 import {
   useConfiguratorStore,
   CATEGORIES,
@@ -116,7 +116,6 @@ function ColorSwatch({ option, isSelected, index, onSelect }: SwatchProps) {
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         />
 
-        {/* Selection ring */}
         <AnimatePresence>
           {isSelected && (
             <motion.div
@@ -174,7 +173,6 @@ function ColorCarousel() {
     [activeCategory, selectOption]
   );
 
-  // Auto-scroll to selected item on category change
   useEffect(() => {
     if (!scrollRef.current) return;
     const idx = options.findIndex((o) => o.id === selectedId);
@@ -190,11 +188,8 @@ function ColorCarousel() {
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Carousel with edge fades */}
       <div className="relative">
-        {/* Left fade */}
         <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-black/50 to-transparent pointer-events-none z-10 rounded-l-2xl" />
-        {/* Right fade */}
         <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-black/50 to-transparent pointer-events-none z-10 rounded-r-2xl" />
 
         <AnimatePresence mode="wait">
@@ -220,7 +215,6 @@ function ColorCarousel() {
         </AnimatePresence>
       </div>
 
-      {/* Selected Info */}
       <AnimatePresence mode="wait">
         {selectedOption && (
           <motion.div
@@ -231,7 +225,7 @@ function ColorCarousel() {
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.15 }}
           >
-            <p className="text-sm font-semibold text-white/80">
+            <p className="text-sm font-semibold text-white/80 font-display">
               {selectedOption.name}
             </p>
             {selectedOption.description && (
@@ -247,7 +241,7 @@ function ColorCarousel() {
 }
 
 /* ——————————————————————————————————————————————
-   Summary Footer (with dynamic pricing)
+   Summary Footer (dynamic pricing + CTA)
    —————————————————————————————————————————————— */
 
 const PREMIUM_BODIES = new Set(["burgundy", "forest", "rose"]);
@@ -278,7 +272,7 @@ function SummaryFooter() {
 
   return (
     <div className="flex items-center justify-between px-4 pt-3 mt-2 border-t border-white/[0.05]">
-      {/* Config preview */}
+      {/* Config summary */}
       <div className="flex items-center gap-3">
         <div className="flex -space-x-1.5">
           {[bodyColor, keycapColor, switchColor].map((c, i) => (
@@ -306,7 +300,7 @@ function SummaryFooter() {
         <AnimatePresence mode="wait">
           <motion.span
             key={price}
-            className="text-base font-bold text-white/90 tabular-nums"
+            className="text-base font-bold text-white/90 tabular-nums font-display"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
@@ -316,12 +310,22 @@ function SummaryFooter() {
           </motion.span>
         </AnimatePresence>
 
+        {/* ——— Premium CTA Button ——— */}
         <motion.button
-          className="px-5 py-2 text-xs font-semibold text-black bg-white hover:bg-white/90 rounded-full transition-colors"
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
+          className="group relative px-6 py-2.5 rounded-full overflow-hidden bg-gradient-to-r from-violet-600 to-fuchsia-500 shadow-lg shadow-violet-500/25"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          Sipariş Ver
+          {/* Shine sweep */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
+
+          <span className="relative flex items-center gap-1.5 text-[11px] font-bold text-white tracking-wide font-display">
+            Sipariş Ver
+            <ArrowRight
+              size={13}
+              className="group-hover:translate-x-0.5 transition-transform"
+            />
+          </span>
         </motion.button>
       </div>
     </div>
@@ -329,7 +333,7 @@ function SummaryFooter() {
 }
 
 /* ——————————————————————————————————————————————
-   Main Configurator UI (Bottom Overlay)
+   Main Configurator UI
    —————————————————————————————————————————————— */
 
 export default function ConfiguratorUI() {
@@ -347,11 +351,9 @@ export default function ConfiguratorUI() {
         }}
       >
         <CategoryTabs />
-
         <div className="mt-3">
           <ColorCarousel />
         </div>
-
         <SummaryFooter />
       </motion.div>
     </div>
